@@ -3,22 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def get_mean_intensity(filepath):
-    # Wczytanie pliku CSV, pomijając pierwsze 3 wiersze
     df = pd.read_csv(filepath, skiprows=3)
     
-    # Wybór kolumn intensywności: 4, 8, 12, 16, ...
+    # select propper columns
     intensity_cols = [i for i in range(1, df.shape[1]) if (i - 3) % 4 == 0]
-    
-    # Pobranie danych intensywności
     intensities = df.iloc[:, intensity_cols].apply(pd.to_numeric, errors='coerce')
-
-    # Średnia intensywność wszystkich kolumn
     mean_intensity = intensities.mean(axis=1)
-    
-    # Wavenumber – bierzemy tylko pierwszą kolumnę (np. kolumna 3)
     wavenumbers = pd.to_numeric(df.iloc[:, 2], errors='coerce')
     
-    # Obliczenie absorbancji wody (np. stosunek pierwszych 10 i kolejnych 10 pomiarów)
+    # calculating water absorbance
     intensity_1_10 = intensities.iloc[:, :10]
     intensity_11_20 = intensities.iloc[:, 10:20]
     epsilon = 1e-10
@@ -47,19 +40,20 @@ def calculate_absorbance(p0_file, p90_file):
         'Water_Absorbance': avg_water_absorbance
     })
 
-# 🔄 Podmień daty plików na aktualne
+# filepath
 file_pairs = {
     "BR_TN_IR": {
-        "p0": r'C:\Users\jskub\OneDrive\Pulpit\Studies\Twente\master_thesis\Experimental\IR\IR analysis\20251021_fifth\imported_from_origin\BR_20250617_TN_IR_p0.csv',
-        "p90": r'C:\Users\jskub\OneDrive\Pulpit\Studies\Twente\master_thesis\Experimental\IR\IR analysis\20251021_fifth\imported_from_origin\BR_20250617_TN_IR_p90.csv'
+        "p0": ,
+        "p90": 
     },
     "CAR_TN_IR": {
-        "p0": r'C:\Users\jskub\OneDrive\Pulpit\Studies\Twente\master_thesis\Experimental\IR\IR analysis\20251021_fifth\imported_from_origin\CAR_20250617_TN_IR_p0.csv',
-        "p90": r'C:\Users\jskub\OneDrive\Pulpit\Studies\Twente\master_thesis\Experimental\IR\IR analysis\20251021_fifth\imported_from_origin\CAR_20250617_TN_IR_p90.csv'
+        "p0": ,
+        "p90": '
     }
 }
 
-x_car = 0  # Współczynnik korekcji na wodę
+#water correction factors
+x_car = 0  
 x_br = 0
 
 results = {}
@@ -73,14 +67,14 @@ df_br = results["BR_TN_IR"]
 if not np.allclose(df_car['Wavenumber'], df_br['Wavenumber'], equal_nan=True):
     raise ValueError("Wavenumbers do not match between CAR_TN_IR and BR_TN_IR!")
 
-# ✅ Korekcja wody dla pojedynczych widm
+#  water correction for individual spectrum
 df_car['Corrected_Absorbance'] = df_car['Absorbance'] - x_car * df_car['Water_Absorbance']
 df_br['Corrected_Absorbance'] = df_br['Absorbance'] - x_br * df_br['Water_Absorbance']
 
-# ✅ Następnie różnica widm już skorygowanych
+# water correction for differential spectrum
 differential_absorbance = df_car['Corrected_Absorbance'] - df_br['Corrected_Absorbance']
 
-# (jeśli chcesz, możesz też zachować uśrednione Water_Absorbance tylko dla informacji)
+# water absorption data
 avg_water_absorbance = (df_car['Water_Absorbance'] + df_br['Water_Absorbance']) / 2
 
 corrected_df = pd.DataFrame({
@@ -89,7 +83,7 @@ corrected_df = pd.DataFrame({
     'Water_Absorbance': avg_water_absorbance,
 })
 
-#Differential spectrum
+#Differential spectrum plot
 plt.figure(figsize=(10,6))
 plt.plot(corrected_df['Wavenumber'], corrected_df['Differential_Absorbance'],
          label='Absorbance (CAR_TN_IR - BR_TN_IR) - water correction factor')
@@ -105,7 +99,7 @@ plt.xticks(np.arange(start_tick, end_tick, 200))
 plt.show(block=False)
 
 
-#Individual spectra
+#Individual spectra plot
 plt.figure(figsize=(10, 6))
 
 offset_car = 0.0  # you can adjust this
@@ -127,7 +121,7 @@ plt.show()
 
 # #Save corrected (differential) absorbance to .txt
 # corrected_df[['Wavenumber', 'Differential_Absorbance']].to_csv(
-#     "C:/Users/jskub/OneDrive/Pulpit/Studies/Twente/master_thesis/Experimental/IR/IR analysis/20251021_fifth/results/differential_spectrum.txt",
+#     "filepath",
 #     sep='\t',
 #     index=False,
 #     header=['Wavenumber [cm⁻¹]', 'Corrected Absorbance [-]']
@@ -135,14 +129,14 @@ plt.show()
 
 # # # Save individual absorbance spectra to .txt
 # # df_car[['Wavenumber', 'Corrected_Absorbance']].to_csv(
-# #     "C:/Users/jskub/OneDrive/Pulpit/Studies/Twente/master_thesis/Experimental/IR/IR analysis/20251021_fifth/results/CAR_TN_IR_absorbance.txt",
+# #     "filepath",
 # #     sep='\t',
 # #     index=False,
 # #     header=['Wavenumber [cm⁻¹]', 'Absorbance [-]']
 # # )
 
 # # df_br[['Wavenumber', 'Absorbance']].to_csv(
-# #     "C:/Users/jskub/OneDrive/Pulpit/Studies/Twente/master_thesis/Experimental/IR/IR analysis/20251021_fifth/results/BR_TN_IR_absorbance.txt",
+# #     "filepath",
 # #     sep='\t',
 # #     index=False,
 # #     header=['Wavenumber [cm⁻¹]', 'Absorbance [-]']
