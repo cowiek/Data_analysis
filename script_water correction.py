@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+#
+#
+#TEST 
+#
 def get_mean_intensity(filepath):
     # Wczytanie pliku CSV, pomijając pierwsze 3 wiersze
     df = pd.read_csv(filepath, skiprows=3)
